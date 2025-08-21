@@ -1,25 +1,28 @@
 import torch
-import pandas as pd
 from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder
+from transformers import BertTokenizer
 
 class TextDataset(Dataset):
-    def __init__(self, file_path, tokenizer, max_len=128):
-        df = pd.read_csv(file_path)
-
-        self.label_encoder = LabelEncoder()
-        self.labels = self.label_encoder.fit_transform(df["label"])
-        self.label_names = list(self.label_encoder.classes_)
-
-        encodings = tokenizer(
-            list(df["text"]), padding="max_length", truncation=True, max_length=max_len
+    def __init__(self, texts, labels, tokenizer, max_length=128):
+        texts = [str(text) for text in texts]
+        self.encodings = tokenizer(
+            texts,
+            truncation=True,
+            padding='max_length',
+            max_length=max_length,
+            return_tensors='pt'
         )
-        self.encodings = encodings
+
+        labels = [int(label) if str(label).replace('.', '', 1).isdigit() else label for label in labels]  # Handle numeric strings
+        self.labels = torch.tensor(labels, dtype=torch.long)
+
+        print(f"TextDataset labels dtype: {self.labels.dtype}")
+        print(f"TextDataset labels sample: {self.labels[:5]}")
+
+    def __getitem__(self, idx):
+        item = {key: self.encodings[key][idx] for key in self.encodings}
+        item['labels'] = self.labels[idx]
+        return item
 
     def __len__(self):
         return len(self.labels)
-
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-        item["label"] = torch.tensor(self.labels[idx])
-        return item

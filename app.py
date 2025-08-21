@@ -1,24 +1,12 @@
-from transformers import BertTokenizerFast
-from data_prep import prepare_data
-from model import create_model
-from trainer import Trainer
-from utils import save_model, load_model_for_inference
+from data_pipeline import DataPipeline
+from model_trainer import ModelTrainer
 
-if __name__ == "__main__":
-    file_path = "news_dataset.csv"
+data_pipeline = DataPipeline(file_path='./data/bbc_news.csv', text_column='description', label_column='label')
+train_loader, val_loader, test_loader, num_labels = data_pipeline.load_and_preprocess()
 
-    tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
-    train_loader, val_loader, label_names = prepare_data(file_path, tokenizer)
+trainer = ModelTrainer(num_labels=num_labels)
+trainer.train(train_loader, val_loader)
+trainer.evaluate(test_loader)
+trainer.save_model(data_pipeline.tokenizer)
 
-    model, optimizer, scheduler, device = create_model(num_labels=len(label_names), train_loader=train_loader)
-
-    trainer = Trainer(model, optimizer, scheduler, device)
-    trainer.train(train_loader, val_loader, num_epochs=3)
-
-    save_model(model, tokenizer, label_names)
-
-    predictor = load_model_for_inference()
-
-    print(predictor(["The stock market is falling rapidly."]))
-    print(predictor(["The new iPhone release caused excitement among fans."]))
-    print(predictor(["The football match ended in a thrilling draw."]))
+data_pipeline.save_label_encoder(trainer.save_directory)
