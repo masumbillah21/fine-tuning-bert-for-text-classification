@@ -11,7 +11,6 @@ The pipeline is implemented in Python using PyTorch and the Hugging Face `transf
 - `model_trainer.py`: Implements the `ModelTrainer` class for training and evaluating the BERT model.
 - `inference.py`: Provides the `Inference` class for predicting categories on new text.
 - `app.py`: Orchestrates the pipeline to preprocess data, train the model, and save it.
-- `debug_dataset.py`: Script to inspect the dataset for debugging.
 - `data/bbc_news.csv`: The input dataset (ensure it exists in the `data` subdirectory).
 
 ## Prerequisites
@@ -34,7 +33,7 @@ The pipeline is implemented in Python using PyTorch and the Hugging Face `transf
 ## Setup
 
 1. **Clone or Create the Project Directory**:
-   - Create a directory (e.g., `D:\python\fine-tuning-bert-for-text-classification`).
+   - Create a directory (e.g., `fine-tuning-bert-for-text-classification`).
    - Save the following files in the directory:
      - `dataset.py`
      - `data_pipeline.py`
